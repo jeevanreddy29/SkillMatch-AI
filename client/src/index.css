@@ -104,6 +104,24 @@ body {
   animation: fadeIn 0.8s ease forwards;
 }
 
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
 /* Utility Classes */
 .container {
   max-width: 1200px;
@@ -112,7 +130,7 @@ body {
 }
 
 .text-gradient {
-  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -130,16 +148,18 @@ button {
   border-radius: 12px;
   font-weight: 600;
   font-size: 1rem;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
 }
 
 .btn-primary:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5);
 }
 
 .btn-primary:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }

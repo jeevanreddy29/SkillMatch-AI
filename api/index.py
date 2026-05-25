@@ -1,5 +1,5 @@
 import os
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Header, Form
 from fastapi.middleware.cors import CORSMiddleware
 import google.generativeai as genai
 from PyPDF2 import PdfReader
@@ -29,14 +29,36 @@ if not GEMINI_API_KEY:
 else:
     genai.configure(api_key=GEMINI_API_KEY)
 
+class ScoreBreakdown(BaseModel):
+    formatting: int
+    keywords: int
+    impact: int
+
+class JobMatchDetails(BaseModel):
+    score: int
+    matched_keywords: List[str]
+    missing_keywords: List[str]
+    role_suitability: str
+
 class AnalysisResult(BaseModel):
     score: int
+    breakdown: ScoreBreakdown
     summary: str
     skills: List[str]
     missing_skills: List[str]
     improvements: List[str]
     interview_questions: List[str]
-    job_match_score: Optional[int] = None
+    job_match: Optional[JobMatchDetails] = None
+
+class InterviewEvaluationRequest(BaseModel):
+    question: str
+    answer: str
+    resume_context: Optional[str] = None
+
+class InterviewEvaluationResult(BaseModel):
+    rating: str
+    feedback: str
+    sample_answer: str
 
 def extract_text_from_pdf(file_bytes):
     pdf = PdfReader(io.BytesIO(file_bytes))
@@ -55,27 +77,50 @@ async def root():
     return {"message": "SkillMatch AI API is running"}
 
 @app.post("/analyze", response_model=AnalysisResult)
-async def analyze_resume(file: UploadFile = File(...)):
-    if not GEMINI_API_KEY or GEMINI_API_KEY == "your_api_key_here":
+async def analyze_resume(
+    file: UploadFile = File(...),
+    job_description: Optional[str] = Form(None),
+    x_gemini_api_key: Optional[str] = Header(None)
+):
+    api_key = x_gemini_api_key or GEMINI_API_KEY
+    if not api_key or api_key == "your_api_key_here":
         # Mock response for demonstration if no API key is provided
-        return {
-            "score": 75,
-            "summary": "This is a mock analysis because no Gemini API key was found. Once you add your key to the .env file, real AI analysis will be performed.",
-            "skills": ["Python", "FastAPI", "React", "JavaScript", "Project Management"],
-            "missing_skills": ["Docker", "Kubernetes", "AWS", "CI/CD"],
+        mock_result = {
+            "score": 78,
+            "breakdown": {
+                "formatting": 85,
+                "keywords": 70,
+                "impact": 80
+            },
+            "summary": "Experienced Software Engineer with a strong foundation in modern web technologies, specifically React, JavaScript, and Python backend microservices. Proven track record of building responsive frontends and fast APIs, but can improve on cloud deployments and containerization.",
+            "skills": ["Python", "FastAPI", "React", "JavaScript", "HTML5", "CSS3", "Git", "SQL"],
+            "missing_skills": ["Docker", "Kubernetes", "AWS", "CI/CD Pipelines", "TypeScript", "Redis"],
             "improvements": [
-                "Add more quantitative achievements to your experience section.",
-                "Include a dedicated skills section at the top of the resume.",
-                "Use more action verbs like ' Spearheaded', 'Automated', or 'Optimized'."
+                "Incorporate quantifiable metrics in your experience bullet points (e.g., 'Optimized database queries, reducing load times by 35%').",
+                "Ensure key cloud infrastructure tools (like AWS or Docker) are mentioned if you have experience with them, as ATS scans highly prioritize these keywords.",
+                "Strengthen your professional summary by making it more achievement-oriented rather than list-based.",
+                "Use stronger, varied action verbs like 'Spearheaded', 'Engineered', and 'Architected' rather than 'Responsible for' or 'Helped'."
             ],
             "interview_questions": [
-                "Can you describe a challenging project you worked on with FastAPI?",
-                "How do you handle state management in large React applications?",
-                "Tell me about a time you had to learn a new technology quickly.",
-                "What is your approach to optimizing database queries?",
-                "How do you ensure your code is maintainable and well-documented?"
+                "How do you approach state management in a large-scale React application?",
+                "Can you walk us through how you would optimize a slow FastAPI endpoint?",
+                "Tell me about a time you had to learn a new technology or framework under a tight deadline.",
+                "What is your strategy for ensuring database queries remain performant as data scales?",
+                "How do you design APIs that are both secure and developer-friendly?"
             ]
         }
+        
+        if job_description:
+            mock_result["job_match"] = {
+                "score": 65,
+                "matched_keywords": ["Python", "FastAPI", "React", "JavaScript", "SQL"],
+                "missing_keywords": ["Docker", "Kubernetes", "AWS", "CI/CD"],
+                "role_suitability": "You have a solid technical foundation that matches the core frontend and backend requirements of the role. However, the job description lists cloud operations (AWS) and containers (Docker/Kubernetes) as crucial responsibilities. Since these are missing from your resume, your match score is moderate. We highly recommend adding these keywords if you have prior exposure, or highlighting parallel devops experience."
+            }
+        else:
+            mock_result["job_match"] = None
+            
+        return mock_result
 
     content = await file.read()
     filename = file.filename.lower()
@@ -91,39 +136,124 @@ async def analyze_resume(file: UploadFile = File(...)):
         if not text.strip():
             raise HTTPException(status_code=400, detail="Could not extract text from the file.")
 
-        # Prompt for Gemini
+        # Compile prompt
+        job_desc_section = ""
+        if job_description:
+            job_desc_section = f"""
+            The candidate is applying for a job with the following job description:
+            === TARGET JOB DESCRIPTION ===
+            {job_description}
+            === END TARGET JOB DESCRIPTION ===
+            
+            Please perform a thorough keyword and skills comparison against this job description.
+            In your JSON response, you MUST populate the "job_match" object.
+            """
+        else:
+            job_desc_section = """
+            No specific job description was provided. The "job_match" field in the JSON response should be null.
+            """
+
         prompt = f"""
-        Analyze the following resume text and provide a comprehensive evaluation in JSON format.
+        You are an expert applicant tracking system (ATS) simulator and senior career coach.
+        Analyze the following resume text and provide a highly comprehensive, professional evaluation in JSON format.
         
         Resume Text:
         {text}
         
+        {job_desc_section}
+        
         The JSON response must follow this structure exactly:
         {{
-            "score": (0-100 integer representing ATS compatibility),
-            "summary": (A brief professional summary of the candidate),
-            "skills": (List of identified technical and soft skills),
-            "missing_skills": (Common industry skills relevant to their profile that are missing),
-            "improvements": (Specific actionable suggestions to improve the resume),
-            "interview_questions": (5 relevant interview questions based on their experience)
+            "score": (0-100 integer representing overall ATS compatibility),
+            "breakdown": {{
+                "formatting": (0-100 integer representing formatting, layout, structure quality),
+                "keywords": (0-100 integer representing keyword optimization and presence),
+                "impact": (0-100 integer representing use of action verbs and quantifiable impact)
+            }},
+            "summary": (A brief professional summary of the candidate's profile),
+            "skills": (List of identified technical and soft skills present in the resume),
+            "missing_skills": (Common industry-standard skills for their career level/domain that are missing from their resume),
+            "improvements": (List of 3-5 specific, actionable suggestions to improve the resume content or layout),
+            "interview_questions": (List of 5 customized, challenging interview questions based on their experience),
+            "job_match": (If no job description was provided, this must be null. If a job description was provided, it must be an object with the following schema:
+                {{
+                    "score": (0-100 integer representing percentage of alignment with the target job),
+                    "matched_keywords": (List of critical keywords from the job description that are present in the resume),
+                    "missing_keywords": (List of critical keywords/skills from the job description that are missing from the resume),
+                    "role_suitability": (A 3-4 sentence strategic analysis of the candidate's suitability for this specific role and what they should emphasize)
+                }}
+            )
         }}
         """
 
+        genai.configure(api_key=api_key)
         model = genai.GenerativeModel('gemini-1.5-flash')
         response = model.generate_content(prompt)
         
-        # Clean response text in case Gemini adds markdown code blocks
         response_text = response.text.strip()
         if response_text.startswith("```json"):
             response_text = response_text[7:]
         if response_text.endswith("```"):
             response_text = response_text[:-3]
-        
+            
         result = json.loads(response_text)
         return result
 
     except Exception as e:
         print(f"Error analyzing resume: {e}")
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
+
+@app.post("/evaluate-answer", response_model=InterviewEvaluationResult)
+async def evaluate_answer(
+    req: InterviewEvaluationRequest,
+    x_gemini_api_key: Optional[str] = Header(None)
+):
+    api_key = x_gemini_api_key or GEMINI_API_KEY
+    if not api_key or api_key == "your_api_key_here":
+        # Mock fallback for evaluation
+        return {
+            "rating": "Average",
+            "feedback": "Your answer is good and covers the basics, but it could be much stronger by using the STAR method (Situation, Task, Action, Result). Try to quantify your achievements (e.g., 'reduced page load time by 40%' instead of just 'improved performance'). Also, link your experience directly to how it solves the company's business problems.",
+            "sample_answer": "In my previous role, we faced a challenge where our main application dashboard took over 5 seconds to load, leading to user drop-offs. I spearheaded the migration of key endpoints to FastAPI and implemented Redis caching for database-intensive queries. As a result, we reduced the average API response time by 75% and improved overall dashboard page load time from 5s to 1.2s, which directly led to a 15% increase in user retention and highly positive feedback from the product team."
+        }
+
+    try:
+        genai.configure(api_key=api_key)
+        
+        prompt = f"""
+        You are an expert technical interviewer and career coach.
+        Evaluate the candidate's answer to the following interview question.
+        
+        Question:
+        {req.question}
+        
+        Candidate's Answer:
+        {req.answer}
+        
+        {"Candidate's Resume Context:" + req.resume_context if req.resume_context else ""}
+        
+        Provide constructive, detailed feedback, rate the answer, and provide an exemplar model response.
+        The JSON response must follow this structure exactly:
+        {{
+            "rating": "Strong" or "Average" or "Needs Improvement",
+            "feedback": "Detailed, constructive feedback containing specific tips to improve",
+            "sample_answer": "A perfect model answer using the STAR method based on their background or a realistic industry standard"
+        }}
+        """
+        
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        response = model.generate_content(prompt)
+        
+        response_text = response.text.strip()
+        if response_text.startswith("```json"):
+            response_text = response_text[7:]
+        if response_text.endswith("```"):
+            response_text = response_text[:-3]
+            
+        result = json.loads(response_text)
+        return result
+    except Exception as e:
+        print(f"Error evaluating answer: {e}")
         raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
 if __name__ == "__main__":
