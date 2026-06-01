@@ -1,5 +1,5 @@
 import os
-from fastapi import FastAPI, UploadFile, File, HTTPException, Header, Form
+from fastapi import FastAPI, APIRouter, UploadFile, File, HTTPException, Header, Form
 from fastapi.middleware.cors import CORSMiddleware
 import google.generativeai as genai
 from PyPDF2 import PdfReader
@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = FastAPI(title="SkillMatch AI Resume Analyzer")
+router = APIRouter()
 
 # CORS configuration
 app.add_middleware(
@@ -73,10 +74,13 @@ def extract_text_from_docx(file_bytes):
     return text
 
 @app.get("/")
+@app.get("/api")
+@app.get("/api/")
 async def root():
     return {"message": "SkillMatch AI API is running"}
 
 @app.post("/analyze", response_model=AnalysisResult)
+@app.post("/api/analyze", response_model=AnalysisResult)
 async def analyze_resume(
     file: UploadFile = File(...),
     job_description: Optional[str] = Form(None),
@@ -204,6 +208,7 @@ async def analyze_resume(
         raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
 @app.post("/evaluate-answer", response_model=InterviewEvaluationResult)
+@app.post("/api/evaluate-answer", response_model=InterviewEvaluationResult)
 async def evaluate_answer(
     req: InterviewEvaluationRequest,
     x_gemini_api_key: Optional[str] = Header(None)
