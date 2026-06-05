@@ -83,45 +83,31 @@ async def analyze_resume(
     x_gemini_api_key: Optional[str] = Header(None)
 ):
     api_key = x_gemini_api_key or GEMINI_API_KEY
-    if not api_key or api_key == "your_api_key_here":
-        # Mock response for demonstration if no API key is provided
-        mock_result = {
-            "score": 78,
-            "breakdown": {
-                "formatting": 85,
-                "keywords": 70,
-                "impact": 80
-            },
-            "summary": "Experienced Software Engineer with a strong foundation in modern web technologies, specifically React, JavaScript, and Python backend microservices. Proven track record of building responsive frontends and fast APIs, but can improve on cloud deployments and containerization.",
-            "skills": ["Python", "FastAPI", "React", "JavaScript", "HTML5", "CSS3", "Git", "SQL"],
-            "missing_skills": ["Docker", "Kubernetes", "AWS", "CI/CD Pipelines", "TypeScript", "Redis"],
-            "improvements": [
-                "Incorporate quantifiable metrics in your experience bullet points (e.g., 'Optimized database queries, reducing load times by 35%').",
-                "Ensure key cloud infrastructure tools (like AWS or Docker) are mentioned if you have experience with them, as ATS scans highly prioritize these keywords.",
-                "Strengthen your professional summary by making it more achievement-oriented rather than list-based.",
-                "Use stronger, varied action verbs like 'Spearheaded', 'Engineered', and 'Architected' rather than 'Responsible for' or 'Helped'."
-            ],
-            "interview_questions": [
-                "How do you approach state management in a large-scale React application?",
-                "Can you walk us through how you would optimize a slow FastAPI endpoint?",
-                "Tell me about a time you had to learn a new technology or framework under a tight deadline.",
-                "What is your strategy for ensuring database queries remain performant as data scales?",
-                "How do you design APIs that are both secure and developer-friendly?"
-            ]
-        }
-        
-        if job_description:
-            mock_result["job_match"] = {
-                "score": 65,
-                "matched_keywords": ["Python", "FastAPI", "React", "JavaScript", "SQL"],
-                "missing_keywords": ["Docker", "Kubernetes", "AWS", "CI/CD"],
-                "role_suitability": "You have a solid technical foundation that matches the core frontend and backend requirements of the role. However, the job description lists cloud operations (AWS) and containers (Docker/Kubernetes) as crucial responsibilities. Since these are missing from your resume, your match score is moderate. We highly recommend adding these keywords if you have prior exposure, or highlighting parallel devops experience."
-            }
-        else:
-            mock_result["job_match"] = None
-            
-        return mock_result
 
+    def get_mock_result(text: str = "", reason="no_key"):
+        import copy
+        try:
+            from server.mock_data import ROLE_MOCK_DATA, detect_role
+        except ImportError:
+            from mock_data import ROLE_MOCK_DATA, detect_role
+
+        role = detect_role(text)
+        mock = copy.deepcopy(ROLE_MOCK_DATA.get(role, ROLE_MOCK_DATA["fullstack"]))
+        
+        prefix = ""
+        if reason == "quota":
+            prefix = "⚠️ Demo Mode (API quota exceeded — update your Gemini API key at aistudio.google.com): "
+            mock["summary"] = prefix + mock["summary"]
+            
+        if job_description:
+            # Job match remains populated
+            pass
+        else:
+            mock["job_match"] = None
+            
+        return mock
+
+    text = ""
     content = await file.read()
     filename = file.filename.lower()
 
@@ -135,7 +121,15 @@ async def analyze_resume(
         
         if not text.strip():
             raise HTTPException(status_code=400, detail="Could not extract text from the file.")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to read file: {str(e)}")
 
+    if not api_key or api_key == "your_api_key_here":
+        return get_mock_result(text, "no_key")
+
+    try:
         # Compile prompt
         job_desc_section = ""
         if job_description:
@@ -145,7 +139,7 @@ async def analyze_resume(
             {job_description}
             === END TARGET JOB DESCRIPTION ===
             
-            Please perform a thorough keyword and skills comparison against this job description.
+            Please perform a keyword and skills comparison against this job description.
             In your JSON response, you MUST populate the "job_match" object.
             """
         else:
@@ -187,7 +181,7 @@ async def analyze_resume(
         """
 
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel('gemini-2.0-flash-lite')
         response = model.generate_content(prompt)
         
         response_text = response.text.strip()
@@ -200,8 +194,11 @@ async def analyze_resume(
         return result
 
     except Exception as e:
-        print(f"Error analyzing resume: {e}")
-        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
+        err = str(e)
+        print(f"Error analyzing resume: {err}")
+        if "429" in err or "quota" in err.lower() or "RESOURCE_EXHAUSTED" in err:
+            return get_mock_result(text, "quota")
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {err}")
 
 @app.post("/evaluate-answer", response_model=InterviewEvaluationResult)
 async def evaluate_answer(
@@ -241,7 +238,7 @@ async def evaluate_answer(
         }}
         """
         
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel('gemini-2.0-flash-lite')
         response = model.generate_content(prompt)
         
         response_text = response.text.strip()
