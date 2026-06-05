@@ -410,30 +410,18 @@ function App() {
                 </p>
               </div>
 
-              {/* Quick Preset Demonstrations */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+              {/* Quick Preset Demonstration */}
+              <div className="max-w-xl mx-auto">
                 <button
                   onClick={() => loadPresetSample('software_engineer')}
-                  className="p-4 rounded-2xl glass glass-hover text-left flex items-start gap-4"
+                  className="w-full p-4 rounded-2xl glass glass-hover text-left flex items-start gap-4 border border-indigo-500/10 hover:border-indigo-500/35 transition-all shadow-lg"
                 >
                   <div className="w-10 h-10 rounded-xl bg-indigo-500/15 text-indigo-400 flex items-center justify-center flex-shrink-0">
-                    <BookOpen size={20} />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-sm text-slate-200">Load Full-Stack Engineer Sample</h4>
-                    <p className="text-xs text-slate-400 mt-1">Instantly review a premium resume analysis and job matching audit.</p>
-                  </div>
-                </button>
-                <button
-                  onClick={() => loadPresetSample('product_manager')}
-                  className="p-4 rounded-2xl glass glass-hover text-left flex items-start gap-4"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-pink-500/15 text-pink-400 flex items-center justify-center flex-shrink-0">
                     <Sparkles size={20} />
                   </div>
                   <div>
-                    <h4 className="font-bold text-sm text-slate-200">Load Product Manager Sample</h4>
-                    <p className="text-xs text-slate-400 mt-1">Review tailored ATS enhancements, check-lists and practices.</p>
+                    <h4 className="font-bold text-sm text-slate-200">Load Demo Resume Analysis</h4>
+                    <p className="text-xs text-slate-400 mt-1">Review format optimization, career suggestions, required skills, and interview practices using a sample Software Engineer resume.</p>
                   </div>
                 </button>
               </div>

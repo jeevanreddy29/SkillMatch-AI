@@ -111,6 +111,48 @@ async def analyze_resume(
             prefix = "⚠️ Demo Mode (API quota exceeded — update your Gemini API key at aistudio.google.com): "
             mock["summary"] = prefix + mock["summary"]
             
+        if text:
+            # Dynamically extract present and missing skills based on the actual resume text
+            text_lower = text.lower()
+            all_possible_skills = list(mock["skills"])
+            for ms in mock["missing_skills"]:
+                if ms not in all_possible_skills:
+                    all_possible_skills.append(ms)
+            
+            present_skills = []
+            for skill in all_possible_skills:
+                # Clean up skill name for matching
+                delimiters = ["( ", " )", "(", ")", "/", "&", ",", "—", "-"]
+                temp_skill = skill
+                for d in delimiters:
+                    temp_skill = temp_skill.replace(d, " ")
+                parts = [p.strip().lower() for p in temp_skill.split() if len(p.strip()) > 2]
+                
+                # Check if the full skill string or any key parts are in the text
+                skill_lower = skill.lower()
+                matched = False
+                if skill_lower in text_lower:
+                    matched = True
+                elif parts and all(part in text_lower for part in parts):
+                    matched = True
+                elif parts and any(part in text_lower for part in parts if part not in ["and", "or", "for", "with", "the", "platforms", "caching", "databases", "pipelines", "tools", "frameworks"]):
+                    matched = True
+                    
+                if matched:
+                    present_skills.append(skill)
+            
+            mock["skills"] = present_skills
+            mock["missing_skills"] = [s for s in all_possible_skills if s not in present_skills]
+
+            # Re-calculate keywords sub-score and overall score
+            total_skills_count = len(all_possible_skills)
+            matched_count = len(present_skills)
+            if total_skills_count > 0:
+                keyword_ratio = matched_count / total_skills_count
+                keywords_score = int(30 + (65 * keyword_ratio))
+                mock["breakdown"]["keywords"] = keywords_score
+                mock["score"] = int((mock["breakdown"]["formatting"] + mock["breakdown"]["keywords"] + mock["breakdown"]["impact"]) / 3)
+
         if job_description:
             # Job match remains populated
             pass
