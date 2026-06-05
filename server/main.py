@@ -40,6 +40,16 @@ class JobMatchDetails(BaseModel):
     missing_keywords: List[str]
     role_suitability: str
 
+class SuitableRole(BaseModel):
+    role: str
+    suitability: str
+    required_skills: List[str]
+
+class ResumeMistake(BaseModel):
+    mistake: str
+    explanation: str
+    severity: str
+
 class AnalysisResult(BaseModel):
     score: int
     breakdown: ScoreBreakdown
@@ -48,6 +58,8 @@ class AnalysisResult(BaseModel):
     missing_skills: List[str]
     improvements: List[str]
     interview_questions: List[str]
+    suitable_roles: List[SuitableRole]
+    mistakes: List[ResumeMistake]
     job_match: Optional[JobMatchDetails] = None
 
 class InterviewEvaluationRequest(BaseModel):
@@ -169,6 +181,8 @@ async def analyze_resume(
             "missing_skills": (Common industry-standard skills for their career level/domain that are missing from their resume),
             "improvements": (List of 3-5 specific, actionable suggestions to improve the resume content or layout),
             "interview_questions": (List of 5 customized, challenging interview questions based on their experience),
+            "suitable_roles": (List of 2-3 suitable roles for the candidate based on their resume. Format as a list of objects: [{"role": "Role Name", "suitability": "Short explanation", "required_skills": ["Skill 1", "Skill 2"]}]),
+            "mistakes": (List of mistakes identified in the resume (formatting, structure, buzzwords, objective statements, outdated practices, etc.) according to 2026 industry standard practices. Format as a list of objects: [{"mistake": "Mistake description", "explanation": "Detailed explanation", "severity": "High" | "Medium" | "Low"}]),
             "job_match": (If no job description was provided, this must be null. If a job description was provided, it must be an object with the following schema:
                 {{
                     "score": (0-100 integer representing percentage of alignment with the target job),

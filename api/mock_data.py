@@ -36,6 +36,30 @@ ROLE_MOCK_DATA = {
             "Describe how you would set up a continuous evaluation pipeline for an agentic AI system using frameworks like Ragas or TruLens.",
             "How do you manage prompt versioning, testing, and caching to keep LLM API latency and costs low?"
         ],
+        "suitable_roles": [
+            {
+                "role": "AI Engineer",
+                "suitability": "You have solid Python and deep learning framework foundations (PyTorch, TensorFlow) matching the core tech requirements.",
+                "required_skills": ["PyTorch", "Hugging Face", "FastAPI", "Vector Databases", "LLM Fine-Tuning"]
+            },
+            {
+                "role": "Machine Learning Engineer",
+                "suitability": "Your experience with NLP and traditional supervised learning is well-suited for ML modeling pipelines.",
+                "required_skills": ["Scikit-Learn", "Model Training", "Data Pipelines", "Docker"]
+            }
+        ],
+        "mistakes": [
+            {
+                "mistake": "Lacks production evaluation metrics",
+                "explanation": "In 2026, AI engineering requires explicit LLM evaluation. Not listing how you evaluate AI agents (e.g., via Ragas) is a significant gap.",
+                "severity": "High"
+            },
+            {
+                "mistake": "No infrastructure details for deployments",
+                "explanation": "Listing PyTorch without stating how models are served (e.g., Triton, vLLM) suggests you only build prototypes rather than production systems.",
+                "severity": "Medium"
+            }
+        ],
         "job_match": {
             "score": 68,
             "matched_keywords": ["Python", "PyTorch", "TensorFlow", "LangChain", "Docker", "FastAPI", "SQL"],
@@ -75,6 +99,30 @@ ROLE_MOCK_DATA = {
             "Explain the difference between Terraform and Pulumi. In what scenario would you choose Pulumi's programming-language approach over HCL?",
             "Describe a scenario where you had to debug a complex network routing or DNS resolution issue within a Kubernetes cluster. What steps did you take?",
             "How do you set up distributed tracing and OpenTelemetry across microservices, and how do you use those metrics to resolve bottlenecks?"
+        ],
+        "suitable_roles": [
+            {
+                "role": "DevOps Engineer",
+                "suitability": "Your core competencies in Terraform, AWS, and Kubernetes align directly with infrastructure engineering requirements.",
+                "required_skills": ["Terraform", "Kubernetes", "AWS", "CI/CD", "Helm"]
+            },
+            {
+                "role": "Platform Engineer",
+                "suitability": "Strong scripting and automation foundations enable building developer platforms.",
+                "required_skills": ["Kubernetes", "Backstage", "GitOps (ArgoCD)", "Pulumi"]
+            }
+        ],
+        "mistakes": [
+            {
+                "mistake": "No GitOps workflow mention",
+                "explanation": "In 2026, manual or script-triggered Kubernetes updates are considered legacy. ArgoCD or Flux is expected.",
+                "severity": "High"
+            },
+            {
+                "mistake": "Absence of Cloud FinOps metrics",
+                "explanation": "Modern DevOps roles emphasize resource efficiency. Not showcasing cloud cost-saving achievements is a missed opportunity.",
+                "severity": "Medium"
+            }
         ],
         "job_match": {
             "score": 70,
@@ -116,6 +164,30 @@ ROLE_MOCK_DATA = {
             "How would you design a data quality monitoring system that alerts the team of schema drift and anomalies before data reaches production dashboards?",
             "Explain how you would optimize a slow, expensive SQL query in Snowflake that is joining two large tables with billions of rows."
         ],
+        "suitable_roles": [
+            {
+                "role": "Data Engineer",
+                "suitability": "Expertise in Spark, Airflow, and Snowflake fits structured batch and data warehouse pipeline engineering.",
+                "required_skills": ["SQL", "Apache Spark", "Airflow", "Snowflake", "dbt"]
+            },
+            {
+                "role": "Analytics Engineer",
+                "suitability": "Strong SQL and data modeling skills are perfect for building downstream analytics models.",
+                "required_skills": ["SQL", "dbt", "Snowflake", "Data Lineage"]
+            }
+        ],
+        "mistakes": [
+            {
+                "mistake": "No mention of data quality validations",
+                "explanation": "Data reliability is paramount in 2026. Failing to list frameworks like Great Expectations or dbt tests is a severe red flag.",
+                "severity": "High"
+            },
+            {
+                "mistake": "Missing modern Lakehouse file format exposure",
+                "explanation": "Enterprises have largely transitioned to Iceberg/Delta Lake. Listing basic S3 files without lakehouse patterns looks dated.",
+                "severity": "Medium"
+            }
+        ],
         "job_match": {
             "score": 67,
             "matched_keywords": ["Python", "SQL", "Apache Spark", "Airflow", "Snowflake", "AWS"],
@@ -155,6 +227,30 @@ ROLE_MOCK_DATA = {
             "How do you optimize image rendering, caching, and memory usage in a mobile feed that scrolls infinitely with high-res media?",
             "What is your strategy for setting up automated mobile testing and deployment using Fastlane and GitHub Actions?",
             "How do Swift's async/await concurrency model and Kotlin's Coroutines differ when handling background tasks on mobile platforms?"
+        ],
+        "suitable_roles": [
+            {
+                "role": "Cross-Platform Mobile Developer",
+                "suitability": "Strong React Native and Flutter skills allow you to deliver apps on iOS and Android.",
+                "required_skills": ["React Native", "Flutter", "TypeScript", "Dart"]
+            },
+            {
+                "role": "Frontend Mobile Specialist",
+                "suitability": "Expertise in React Native translates well to hybrid web-mobile application teams.",
+                "required_skills": ["React Native", "TypeScript", "Redux", "UI/UX Design"]
+            }
+        ],
+        "mistakes": [
+            {
+                "mistake": "No native platform integration details",
+                "explanation": "Exclusively using standard React Native/Flutter modules without Swift/Kotlin bridge experience suggests limited native depth.",
+                "severity": "High"
+            },
+            {
+                "mistake": "Missing automated mobile store deployment pipelines",
+                "explanation": "Relying on manual app store submissions in 2026 is inefficient. Fastlane or Bitrise pipelines should be specified.",
+                "severity": "Medium"
+            }
         ],
         "job_match": {
             "score": 68,
@@ -196,6 +292,30 @@ ROLE_MOCK_DATA = {
             "Compare CSS-in-JS, Tailwind CSS, and CSS Modules. What are the performance and developer-experience tradeoffs of each in a large-scale project?",
             "How would you set up and configure a micro-frontend architecture using Webpack Module Federation or Vite's federation plugins?"
         ],
+        "suitable_roles": [
+            {
+                "role": "Frontend Engineer",
+                "suitability": "Expertise in React, TypeScript, and styling frameworks matches standard modern web teams.",
+                "required_skills": ["React", "TypeScript", "Tailwind CSS", "Vite"]
+            },
+            {
+                "role": "UI Engineer",
+                "suitability": "Strong CSS, animations, and design system integration skills are suited for product styling roles.",
+                "required_skills": ["React", "Tailwind CSS", "Design Systems", "Web Accessibility"]
+            }
+        ],
+        "mistakes": [
+            {
+                "mistake": "Missing Modern Server Rendering frameworks",
+                "explanation": "In 2026, client-side-only React is rarely used for new public platforms. Next.js App Router or Server Actions exposure is required.",
+                "severity": "High"
+            },
+            {
+                "mistake": "No visual regression or automated E2E testing",
+                "explanation": "Relying solely on unit tests is considered insufficient. Experience with Playwright or Chromatic is highly recommended.",
+                "severity": "Medium"
+            }
+        ],
         "job_match": {
             "score": 66,
             "matched_keywords": ["React", "TypeScript", "JavaScript", "Tailwind CSS", "Vite", "REST APIs"],
@@ -235,6 +355,30 @@ ROLE_MOCK_DATA = {
             "Compare gRPC and REST. Under what conditions would you choose gRPC for service-to-service communication?",
             "How do you handle message delivery guarantees (at-least-once, exactly-once) when working with Apache Kafka?",
             "Walk me through how you would scale a database horizontally using sharding, read-replicas, and connection pooling."
+        ],
+        "suitable_roles": [
+            {
+                "role": "Backend Developer",
+                "suitability": "Strong background in Python API frameworks (FastAPI) and PostgreSQL schemas.",
+                "required_skills": ["Python", "FastAPI", "PostgreSQL", "REST APIs", "Docker"]
+            },
+            {
+                "role": "API Platform Engineer",
+                "suitability": "Skilled in designing scalable endpoints and managing database connections.",
+                "required_skills": ["Python", "gRPC", "Redis Caching", "PostgreSQL"]
+            }
+        ],
+        "mistakes": [
+            {
+                "mistake": "No asynchronous event streaming experience",
+                "explanation": "2026 enterprise systems are highly event-driven. Not listing Apache Kafka or RabbitMQ limits suitability.",
+                "severity": "High"
+            },
+            {
+                "mistake": "Absence of microservices connection caching",
+                "explanation": "Not listing caching layers (Redis) or connection pooling indicates lack of experience with high-load optimization.",
+                "severity": "Medium"
+            }
         ],
         "job_match": {
             "score": 69,
@@ -283,6 +427,30 @@ ROLE_MOCK_DATA = {
             "Explain the difference between horizontal and vertical scaling. When would you use Kubernetes over a simpler deployment strategy?",
             "Describe a CI/CD pipeline you've built or worked with. What stages did it include and how did you handle rollbacks on failed deployments?",
             "You notice a PostgreSQL query is taking 8 seconds on a table with 50 million rows. Walk me through your step-by-step debugging and optimization process."
+        ],
+        "suitable_roles": [
+            {
+                "role": "Full-Stack Software Engineer",
+                "suitability": "Broad capabilities across React frontend and Python FastAPI backend support full-feature delivery.",
+                "required_skills": ["React", "TypeScript", "Python", "FastAPI", "PostgreSQL"]
+            },
+            {
+                "role": "Product Engineer",
+                "suitability": "Perfect fit for early-to-mid stage startups where end-to-end prototyping is critical.",
+                "required_skills": ["React", "Node.js/Python", "REST APIs", "Docker", "Tailwind CSS"]
+            }
+        ],
+        "mistakes": [
+            {
+                "mistake": "Lack of deployment pipeline automation",
+                "explanation": "Not mentioning CI/CD (GitHub Actions) or Docker containerization indicates you cannot deploy or maintain the systems you code.",
+                "severity": "High"
+            },
+            {
+                "mistake": "No modern AI/LLM API integration experience",
+                "explanation": "In 2026, most web applications require some AI components. Missing Generative AI or LLM API keywords is a significant gap.",
+                "severity": "Medium"
+            }
         ],
         "job_match": {
             "score": 62,

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Upload, FileText, CheckCircle, AlertTriangle, Lightbulb, 
   MessageSquare, Target, Loader2, Key, Settings, X, Sparkles, 
-  ChevronRight, Check, Play, BookOpen, ThumbsUp, Send 
+  ChevronRight, Check, Play, BookOpen, ThumbsUp, Send, Briefcase, AlertOctagon 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
@@ -34,6 +34,30 @@ const PRESET_SAMPLES = {
       "How do you secure REST APIs against unauthorized access and common web vulnerabilities?",
       "Explain a time you resolved a major production deployment issue. What was your debugging process?"
     ],
+    suitable_roles: [
+      {
+        role: "Full-Stack Software Engineer",
+        suitability: "Broad capabilities across React frontend and Python FastAPI backend support full-feature delivery.",
+        required_skills: ["React", "TypeScript", "Python", "FastAPI", "PostgreSQL"]
+      },
+      {
+        role: "Backend Specialist",
+        suitability: "Solid backend microservices migration history fits high-scale backend API teams.",
+        required_skills: ["Python", "FastAPI", "PostgreSQL", "Docker", "REST APIs"]
+      }
+    ],
+    mistakes: [
+      {
+        mistake: "Lack of deployment pipeline automation",
+        explanation: "Not mentioning CI/CD (GitHub Actions) or Docker containerization indicates you cannot deploy or maintain the systems you code.",
+        severity: "High"
+      },
+      {
+        mistake: "No modern AI/LLM API integration experience",
+        explanation: "In 2026, most web applications require some AI components. Missing Generative AI or LLM API keywords is a significant gap.",
+        severity: "Medium"
+      }
+    ],
     job_match: {
       score: 88,
       matched_keywords: ["React", "Node.js", "PostgreSQL", "AWS", "Docker", "TypeScript"],
@@ -63,6 +87,30 @@ const PRESET_SAMPLES = {
       "How do you use quantitative metrics to guide your product feature decisions?",
       "Describe how you work with UI/UX designers to translate user research into wireframes.",
       "What is your approach to defining and tracking success metrics (KPIs) for a newly released feature?"
+    ],
+    suitable_roles: [
+      {
+        role: "Technical Product Manager",
+        suitability: "Your technical background in agile backlogs and user research makes you a great fit.",
+        required_skills: ["Product Strategy", "Agile/Scrum", "User Research", "Jira"]
+      },
+      {
+        role: "Product Marketing Specialist",
+        suitability: "Strong SaaS product scaling experience translates well to marketing execution.",
+        required_skills: ["SaaS", "A/B Testing", "Figma", "User Analytics"]
+      }
+    ],
+    mistakes: [
+      {
+        mistake: "Lack of data tool specifics",
+        explanation: "Not listing modern product analytics tools like Mixpanel or Amplitude makes it hard to verify data-driven decision capabilities.",
+        severity: "High"
+      },
+      {
+        mistake: "Missing PLG metric details",
+        explanation: "In 2026, Product-Led Growth is the default SaaS paradigm. Leaving out PLG frameworks is a notable omission.",
+        severity: "Medium"
+      }
     ],
     job_match: {
       score: 74,
@@ -744,6 +792,88 @@ function App() {
                   </div>
                 </motion.div>
               )}
+
+              {/* SUITABLE ROLES & RESUME MISTAKES ROW */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                
+                {/* Column 1: Suitable Career Matches */}
+                <div className="glass p-8 space-y-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-500/20 text-indigo-400 flex items-center justify-center flex-shrink-0">
+                      <Briefcase size={20} />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-base uppercase tracking-wider text-slate-200">Suitable Career Paths</h3>
+                      <p className="text-[11px] text-slate-400 mt-0.5">Role recommendations based on parsed resume history</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    {result.suitable_roles && result.suitable_roles.map((roleObj, i) => (
+                      <div key={i} className="p-5 rounded-xl border border-white/5 bg-white/5 space-y-3.5 hover:border-white/10 hover:bg-white/10 transition-all">
+                        <div className="flex justify-between items-start gap-2">
+                          <h4 className="font-bold text-sm text-slate-200">{roleObj.role}</h4>
+                          <span className="px-2 py-0.5 bg-indigo-500/10 border border-indigo-500/20 rounded text-[9px] font-bold text-indigo-400 tracking-wider uppercase">Match Suggested</span>
+                        </div>
+                        <p className="text-xs text-slate-400 leading-relaxed font-normal">
+                          {roleObj.suitability}
+                        </p>
+                        <div className="pt-2 border-t border-white/5">
+                          <h5 className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-2">Required Skills for Role:</h5>
+                          <div className="flex flex-wrap gap-1.5">
+                            {roleObj.required_skills.map((skill, idx) => (
+                              <span key={idx} className="px-2 py-0.5 bg-slate-900 border border-white/5 text-[10px] font-medium text-slate-300 rounded-md">
+                                {skill}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Column 2: Resume Mistakes Audit */}
+                <div className="glass p-8 space-y-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-red-500/15 border border-red-500/20 text-red-400 flex items-center justify-center flex-shrink-0">
+                      <AlertOctagon size={20} />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-base uppercase tracking-wider text-slate-200">Resume Mistakes Audit</h3>
+                      <p className="text-[11px] text-slate-400 mt-0.5">Identified formatting & content anti-patterns</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    {result.mistakes && result.mistakes.map((mistakeObj, i) => {
+                      const isHigh = mistakeObj.severity === 'High';
+                      const isMedium = mistakeObj.severity === 'Medium';
+                      return (
+                        <div key={i} className="p-5 rounded-xl border border-white/5 bg-white/5 space-y-2.5 hover:border-white/10 hover:bg-white/10 transition-all">
+                          <div className="flex justify-between items-center gap-2">
+                            <h4 className="font-bold text-sm text-slate-200 flex items-center gap-2 flex-wrap">
+                              <span className={`w-2 h-2 rounded-full ${isHigh ? 'bg-red-500 animate-pulse' : isMedium ? 'bg-amber-500' : 'bg-yellow-400'}`}></span>
+                              {mistakeObj.mistake}
+                            </h4>
+                            <span className={`px-2 py-0.5 rounded text-[9px] font-black tracking-wider uppercase ${
+                              isHigh ? 'bg-red-500/10 border border-red-500/20 text-red-400' :
+                              isMedium ? 'bg-amber-500/10 border border-amber-500/20 text-amber-500' :
+                              'bg-yellow-500/10 border border-yellow-500/20 text-yellow-400'
+                            }`}>
+                              {mistakeObj.severity}
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-400 leading-relaxed font-normal">
+                            {mistakeObj.explanation}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+              </div>
 
               {/* CORE DETAILS ROW: Skill gap analyzer & actionable improvements */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
