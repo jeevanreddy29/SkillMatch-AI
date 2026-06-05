@@ -93,35 +93,53 @@ async def analyze_resume(
         if reason == "quota":
             prefix = "⚠️ Demo Mode (API quota exceeded — update your Gemini API key at aistudio.google.com): "
         mock = {
-            "score": 78,
+            "score": 74,
             "breakdown": {
-                "formatting": 85,
-                "keywords": 70,
-                "impact": 80
+                "formatting": 80,
+                "keywords": 65,
+                "impact": 76
             },
-            "summary": prefix + "Experienced Software Engineer with a strong foundation in modern web technologies, specifically React, JavaScript, and Python backend microservices. Proven track record of building responsive frontends and fast APIs, but can improve on cloud deployments and containerization.",
-            "skills": ["Python", "FastAPI", "React", "JavaScript", "HTML5", "CSS3", "Git", "SQL"],
-            "missing_skills": ["Docker", "Kubernetes", "AWS", "CI/CD Pipelines", "TypeScript", "Redis"],
+            "summary": prefix + "Mid-level Full-Stack Engineer with solid experience in React, Python, and REST API development. Strong grasp of core web technologies but lacks exposure to modern cloud-native tools, AI/LLM integrations, and infrastructure-as-code practices that are now standard requirements in top-tier engineering roles in 2025.",
+            "skills": [
+                "Python", "React", "JavaScript", "TypeScript", "FastAPI", "Node.js",
+                "PostgreSQL", "MongoDB", "REST APIs", "Git", "GitHub", "HTML5", "CSS3",
+                "Tailwind CSS", "SQL", "Agile / Scrum"
+            ],
+            "missing_skills": [
+                "Docker & Kubernetes",
+                "AWS / GCP / Azure (Cloud Platforms)",
+                "CI/CD Pipelines (GitHub Actions, Jenkins)",
+                "Terraform / Infrastructure as Code",
+                "Next.js / Server-Side Rendering",
+                "LangChain / LLM API Integration",
+                "Vector Databases (Pinecone, Weaviate, ChromaDB)",
+                "GraphQL",
+                "Redis / Caching Strategies",
+                "Microservices Architecture",
+                "System Design & Scalability",
+                "gRPC / WebSockets"
+            ],
             "improvements": [
-                "Incorporate quantifiable metrics in your experience bullet points (e.g., 'Optimized database queries, reducing load times by 35%').",
-                "Ensure key cloud infrastructure tools (like AWS or Docker) are mentioned if you have experience with them, as ATS scans highly prioritize these keywords.",
-                "Strengthen your professional summary by making it more achievement-oriented rather than list-based.",
-                "Use stronger, varied action verbs like 'Spearheaded', 'Engineered', and 'Architected' rather than 'Responsible for' or 'Helped'."
+                "Add quantifiable impact to every bullet point — e.g., 'Reduced API response time by 42% by implementing Redis caching', instead of 'Improved performance'. ATS and hiring managers rank measurable results very highly.",
+                "Include cloud platform experience (AWS, GCP, or Azure) prominently. In 2025, nearly 90% of engineering job descriptions require at least one major cloud provider. Even listing AWS Free Tier projects helps.",
+                "Add an 'AI & Emerging Tech' section to your resume. Employers are actively seeking engineers who have hands-on experience with LLM APIs (OpenAI, Gemini), LangChain, RAG pipelines, or vector databases — even side projects count.",
+                "List CI/CD tools explicitly (e.g., GitHub Actions, CircleCI, Jenkins). Automated deployment pipelines are a baseline expectation at most companies in 2025.",
+                "Restructure your resume with a strong Technical Skills section at the top, grouped by category: Languages, Frameworks, Cloud & DevOps, Databases, AI/ML Tools. This maximizes ATS keyword matching."
             ],
             "interview_questions": [
-                "How do you approach state management in a large-scale React application?",
-                "Can you walk us through how you would optimize a slow FastAPI endpoint?",
-                "Tell me about a time you had to learn a new technology or framework under a tight deadline.",
-                "What is your strategy for ensuring database queries remain performant as data scales?",
-                "How do you design APIs that are both secure and developer-friendly?"
+                "Walk me through how you would design a scalable, cloud-native REST API on AWS that handles 100,000 concurrent users. What services would you use and why?",
+                "How would you integrate an LLM (like Gemini or GPT-4) into a production application? Describe your approach to prompt engineering, caching, and cost control.",
+                "Explain the difference between horizontal and vertical scaling. When would you use Kubernetes over a simpler deployment strategy?",
+                "Describe a CI/CD pipeline you've built or worked with. What stages did it include and how did you handle rollbacks on failed deployments?",
+                "You notice a PostgreSQL query is taking 8 seconds on a table with 50 million rows. Walk me through your step-by-step debugging and optimization process."
             ]
         }
         if job_description:
             mock["job_match"] = {
-                "score": 65,
-                "matched_keywords": ["Python", "FastAPI", "React", "JavaScript", "SQL"],
-                "missing_keywords": ["Docker", "Kubernetes", "AWS", "CI/CD"],
-                "role_suitability": "You have a solid technical foundation that matches the core frontend and backend requirements of the role. However, the job description lists cloud operations (AWS) and containers (Docker/Kubernetes) as crucial responsibilities. Since these are missing from your resume, your match score is moderate. We highly recommend adding these keywords if you have prior exposure, or highlighting parallel devops experience."
+                "score": 62,
+                "matched_keywords": ["Python", "React", "TypeScript", "REST APIs", "PostgreSQL", "Git", "Agile"],
+                "missing_keywords": ["Docker", "Kubernetes", "AWS", "CI/CD", "LangChain", "GraphQL", "Terraform", "Redis"],
+                "role_suitability": "Your core programming skills align well with the role's frontend and backend requirements. However, the job description heavily emphasizes cloud-native deployment (AWS/GCP), containerization (Docker/Kubernetes), and increasingly AI integration skills — all of which are absent from your resume. To significantly boost your match score, prioritize adding cloud certifications (AWS Cloud Practitioner is a great start), containerize at least one personal project with Docker, and explore LLM API integration to stay competitive in the 2025 job market."
             }
         else:
             mock["job_match"] = None
