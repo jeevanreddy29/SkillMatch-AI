@@ -87,16 +87,19 @@ async def analyze_resume(
     x_gemini_api_key: Optional[str] = Header(None)
 ):
     api_key = x_gemini_api_key or GEMINI_API_KEY
-    if not api_key or api_key == "your_api_key_here":
-        # Mock response for demonstration if no API key is provided
-        mock_result = {
+
+    def get_mock_result(reason="no_key"):
+        prefix = ""
+        if reason == "quota":
+            prefix = "⚠️ Demo Mode (API quota exceeded — update your Gemini API key at aistudio.google.com): "
+        mock = {
             "score": 78,
             "breakdown": {
                 "formatting": 85,
                 "keywords": 70,
                 "impact": 80
             },
-            "summary": "Experienced Software Engineer with a strong foundation in modern web technologies, specifically React, JavaScript, and Python backend microservices. Proven track record of building responsive frontends and fast APIs, but can improve on cloud deployments and containerization.",
+            "summary": prefix + "Experienced Software Engineer with a strong foundation in modern web technologies, specifically React, JavaScript, and Python backend microservices. Proven track record of building responsive frontends and fast APIs, but can improve on cloud deployments and containerization.",
             "skills": ["Python", "FastAPI", "React", "JavaScript", "HTML5", "CSS3", "Git", "SQL"],
             "missing_skills": ["Docker", "Kubernetes", "AWS", "CI/CD Pipelines", "TypeScript", "Redis"],
             "improvements": [
@@ -113,18 +116,19 @@ async def analyze_resume(
                 "How do you design APIs that are both secure and developer-friendly?"
             ]
         }
-        
         if job_description:
-            mock_result["job_match"] = {
+            mock["job_match"] = {
                 "score": 65,
                 "matched_keywords": ["Python", "FastAPI", "React", "JavaScript", "SQL"],
                 "missing_keywords": ["Docker", "Kubernetes", "AWS", "CI/CD"],
                 "role_suitability": "You have a solid technical foundation that matches the core frontend and backend requirements of the role. However, the job description lists cloud operations (AWS) and containers (Docker/Kubernetes) as crucial responsibilities. Since these are missing from your resume, your match score is moderate. We highly recommend adding these keywords if you have prior exposure, or highlighting parallel devops experience."
             }
         else:
-            mock_result["job_match"] = None
-            
-        return mock_result
+            mock["job_match"] = None
+        return mock
+
+    if not api_key or api_key == "your_api_key_here":
+        return get_mock_result("no_key")
 
     content = await file.read()
     filename = file.filename.lower()
@@ -203,9 +207,14 @@ async def analyze_resume(
         result = json.loads(response_text)
         return result
 
+    except HTTPException:
+        raise
     except Exception as e:
-        print(f"Error analyzing resume: {e}")
-        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
+        err = str(e)
+        print(f"Error analyzing resume: {err}")
+        if "429" in err or "quota" in err.lower() or "RESOURCE_EXHAUSTED" in err:
+            return get_mock_result("quota")
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {err}")
 
 @app.post("/evaluate-answer", response_model=InterviewEvaluationResult)
 @app.post("/api/evaluate-answer", response_model=InterviewEvaluationResult)
@@ -214,13 +223,15 @@ async def evaluate_answer(
     x_gemini_api_key: Optional[str] = Header(None)
 ):
     api_key = x_gemini_api_key or GEMINI_API_KEY
+
+    mock_eval = {
+        "rating": "Average",
+        "feedback": "Your answer is good and covers the basics, but it could be much stronger by using the STAR method (Situation, Task, Action, Result). Try to quantify your achievements (e.g., 'reduced page load time by 40%' instead of just 'improved performance'). Also, link your experience directly to how it solves the company's business problems.",
+        "sample_answer": "In my previous role, we faced a challenge where our main application dashboard took over 5 seconds to load, leading to user drop-offs. I spearheaded the migration of key endpoints to FastAPI and implemented Redis caching for database-intensive queries. As a result, we reduced the average API response time by 75% and improved overall dashboard page load time from 5s to 1.2s, which directly led to a 15% increase in user retention and highly positive feedback from the product team."
+    }
+
     if not api_key or api_key == "your_api_key_here":
-        # Mock fallback for evaluation
-        return {
-            "rating": "Average",
-            "feedback": "Your answer is good and covers the basics, but it could be much stronger by using the STAR method (Situation, Task, Action, Result). Try to quantify your achievements (e.g., 'reduced page load time by 40%' instead of just 'improved performance'). Also, link your experience directly to how it solves the company's business problems.",
-            "sample_answer": "In my previous role, we faced a challenge where our main application dashboard took over 5 seconds to load, leading to user drop-offs. I spearheaded the migration of key endpoints to FastAPI and implemented Redis caching for database-intensive queries. As a result, we reduced the average API response time by 75% and improved overall dashboard page load time from 5s to 1.2s, which directly led to a 15% increase in user retention and highly positive feedback from the product team."
-        }
+        return mock_eval
 
     try:
         genai.configure(api_key=api_key)
@@ -257,9 +268,14 @@ async def evaluate_answer(
             
         result = json.loads(response_text)
         return result
+    except HTTPException:
+        raise
     except Exception as e:
-        print(f"Error evaluating answer: {e}")
-        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
+        err = str(e)
+        print(f"Error evaluating answer: {err}")
+        if "429" in err or "quota" in err.lower() or "RESOURCE_EXHAUSTED" in err:
+            return mock_eval
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {err}")
 
 if __name__ == "__main__":
     import uvicorn
